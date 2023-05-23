@@ -19,38 +19,34 @@ main:
     mov ax, NUM
     mov ds, ax
 
-    ;input first num
+    ;ввод первого числа
     mov ah, 1
     int 21h
-    sub al, '0'
     mov [X], ax
     
-    ;going to next line
+    ;переход на новую строку
     mov dl, 10
     int 21h
 	
-    ;input second num
+    ;ввод второго числа
     mov ah, 1
     int 21h
-    sub al, '0'
     mov [Y], ax
 
-    ;going to next line
+    ;переход на новую строку
     mov dl, 10
 	int 21h
 
-    ; find diff
+    ; вычисляем разность
     mov ax, [X]
     sub ax, [Y]
     mov [result], ax
 
-    ; print diff
+    ; печатаем результат
     mov ax, [result]    
     add al, '0'
     mov dl, al
     mov ah, 2
-    int 21h
-    mov dl, 0Ah
     int 21h
 
     mov ah, 4CH

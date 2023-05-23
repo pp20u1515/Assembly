@@ -1,4 +1,4 @@
-EXTRN output_X: near ; указываем что метка output_X доступна в другом модуле с ближайжим переходом
+EXTRN output_X: near 
 
 STK SEGMENT PARA STACK 'STACK'
 	db 100 dup(0) 
@@ -20,6 +20,6 @@ main:
 	int 21h ; вызов функции DOS
 CSEG ENDS
 
-PUBLIC X ; указываем что метка X может быть доступна в других модулях
+PUBLIC X 
 
 END main

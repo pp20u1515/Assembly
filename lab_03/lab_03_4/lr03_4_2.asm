@@ -15,7 +15,7 @@ exit:
 	mov ax, SD2
 	mov ds, ax
 
-	xchg ah, Y
+	xchg ah, Y 
 	xchg ah, ES:X
 	xchg ah, Y	
 

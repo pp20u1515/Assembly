@@ -1,4 +1,4 @@
-SD1 SEGMENT para common 'DATA' ; так как тип common то данные налажываются друг на друга и хранятся по одному и тому же адресу
+SD1 SEGMENT para common 'DATA' 
 	C1 LABEL byte
 	ORG 1h ;'ORG' устанавливает адрес, по которому следующий за ней код должен появиться в памяти. (смещение на 1 байт)
 	C2 LABEL byte
@@ -9,7 +9,7 @@ CSEG SEGMENT para 'CODE'
 main:
 	mov ax, SD1
 	mov ds, ax
-	mov ah, 2  ; функция вывода символа
+	mov ah, 2  
 	mov dl, C1
 	int 21h
 	mov dl, C2

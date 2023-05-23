@@ -1,73 +1,74 @@
-STK SEGMENT PARA STACK 'STACK' ;сегмент типа STACK, размером параграф класса STACK 
-    DB 100 DUP (0) ;выделение память в 100 байт и заполнение 0
-STK ENDS ;конец сегмента
+; Ввод: 
+; знаковое в 2 с/с
+; Вывод: 
+; беззнаковое в 10 с/с
+; знаковое в 16 с/с
 
-DMATRIXSEG SEGMENT PARA PUBLIC 'DATA' ;сегмент типа PUBLIC, размером параграф класса 'DATA'
-    M DB 0 ;количество строк
-    N DB 0 ;количество столбцов
-    MAX_M DB 9 ;выделение память в 9 байт
-    MAX_N DB 9 ;выделение память в 9 байт
-    MATRIX DB 9 * 9 DUP (0) ;выделение память матрицы в (9 * 9) байт и заполнение 0
-DMATRIXSEG ENDS ;конец сегмента
+EXTRN read_bin_sign: near
+EXTRN print_bin_sign: near
+EXTRN print_dec_unsign: near
+EXTRN print_hex: near
 
-DMSGSEG SEGMENT PARA PUBLIC 'DATA' ;сегмент типа PUBLIC, размером параграф класса 'DATA'
-    MSG1 DB 'Enter number of rows: $' ;объявляем переменую MSG1 и передаем ей текст
-    MSG2 DB 'Enter number of columns: $' ;объявляем переменую MSG2 и передаем ей текст
-    MATRIXMSG DB 'Enter elements: $' ;объявляем переменую MATRIXMSG и передаем ей текст
-DMSGSEG ENDS ;конец сегмента
 
-CSEG SEGMENT PARA PUBLIC 'CODE'
-    ASSUME CS:CSEG, SS:STK, DS:DMSGSEG, ES:DMATRIXSEG
+STK SEGMENT PARA STACK 'STACK'
+	    DB 200 dup (0)
+STK ENDS
 
-PRINT_MESSAGE PROC ;процедура вывода сообщения
-    MOV AX, DX ;указываем, что выводим
-    MOV AH, 9 ;указываем, что будет вызвана функция вывода строки
-    INT 21H ;DOS функция
-    RET ;выход
-PRINT_MESSAGE ENDP ;конец процедуры
+SEGDATA SEGMENT PARA PUBLIC 'DATA'
+	menu_print DB "1. Input sign num in binary format"
+	           DB 10
+	           DB 13
+	           DB "2. Output num in binary format"
+	           DB 10
+	           DB 13
+	           DB "3. Output num in unsigned decimal format"
+	           DB 10
+	           DB 13
+	           DB "4. Output num in signed hex format"
+	           DB 10
+	           DB 13
+	           DB "5. Exit"
+	           DB 10
+	           DB 13
+	           DB "Enter mode: $"
+	actions    DW read_bin_sign, print_bin_sign, print_dec_unsign, print_hex, exit ; индекси 0, 2,4, 6, 8
+SEGDATA ENDS
 
-INPUT_NUM PROC ;процедуру ввода числа
-    MOV AH, 01H ;ввод чисел
-    INT 21H ;вызов DOS
+SEGCODE SEGMENT PARA PUBLIC "CODE"
+	        ASSUME CS:SEGCODE, DS:SEGDATA, SS:STK
 
-    MOV DH, AL ;в AL cчитано само число как символ
-    SUB DH, '0'
-    RET
-INPUT_NUM ENDP
+	new_line proc
+		mov    ah, 2 ; вывод символа в stdout
+		mov    dl, 10 ;перевести курсор на нов. строку
+		int    21h ;вызов функции DOS 
+		mov    dl, 13 ;курсор поместить в нач. строки
+		int    21h ;вызов функции DOS
+		ret
+    new_line endp
 
-INPUT_NEW_LINE PROC
-    MOV AX, 2 ;вывод на экран символа
-    MOV DL, 10 ;символ новой строки
-    INT 21H ;функция DOS
-    MOV DL, 13 ;переводим указатель на начало
-    INT 21H ;функция DOS
-    RET ;выход
-INPUT_NEW_LINE ENDP
+	main:   
+	        mov    AX, SEGDATA
+	        mov    DS, AX
+			menu:   
+				mov    ah, 9 ; вывод строки в stdout
+				mov    dx, offset menu_print 
+				int    21h ;вызов функции DOS
+				mov    ah, 1 ; считать символ из stdin с эхом
+				int    21h ;вызов функции DOS
 
-MAIN:
-    MOV AX, DMSGSEG ;в сегмент AX кладем адрес сегмента DMSGSEG
-    MOV DS, AX ;в сегмент DS записываем адрес сегмента АХ(так как нельза сразу записать в DS) 
-    MOV AX, DMATRIXSEG ;в сегмент АХ записываем адрес сегмента DMATRIXSEG  
-    MOV ES, AX ;в сегмент ES записываем адрес сегмента AX
-    MOV DX, OFFSET MSG1 ;в сегмент DX записываем то, что будем выводить 
-    
-    CALL PRINT_MESSAGE ;вызываем процедуру вывода строки
-    CALL INPUT_NUM ;вызываем процедуру ввода числа 
-
-    MOV N, DH ;переменой N передаем введимое значение
-
-    CALL INPUT_NEW_LINE
-
-    MOV DX, OFFSET MSG2
-
-    CALL PRINT_MESSAGE
-    CALL INPUT_NUM
-
-    MOV M, DH
-
-    CALL INPUT_NEW_LINE
-
-    MOV AX, 4C00H ;код завершения
-    INT 21H ;вызов DOS
-CSEG ENDS
-END MAIN
+				sub    al, "1" ; если мы выбрали пункт 3, то вычитаем 1 из символьного значения считанного символа.
+				 			   ; Это связано с тем, что в данном счучае пункты меню нумеруются начиная с 1, а в 
+							   ; процессоре они нумеруются начиная с 0   
+				mov    dl, 2 ; загрузка значения 2 в регистр dl
+				mul    dl ; умножение регистра al на значение регистра dl. В результате получаем значение, которое
+						  ; будет использоваться в качестве индекса массива "actions" 
+				mov    bx, ax ; сохраняем наш выбор из меню
+				
+				call new_line
+				call   actions[bx] ; вызов метки actions
+				jmp    menu 
+	exit:
+	        mov    ax, 4c00h
+	        int    21h
+SEGCODE ENDS
+END main

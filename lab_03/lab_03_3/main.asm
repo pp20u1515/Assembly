@@ -13,8 +13,12 @@ SD3 SEGMENT para public 'DATA'
 	db 65535 - 2 dup (0)
 SD3 ENDS
 
+SSEG SEGMENT PARA STACK 'STACK'
+	db 100 dup(0)
+SSEG ENDS
+
 CSEG SEGMENT para public 'CODE'
-	assume CS:CSEG, DS:SD1
+	assume CS:CSEG, DS:SD1, ES:SD3, SS:SSEG
 output:
 	mov ah, 2
 	int 21h
@@ -33,13 +37,14 @@ assume DS:SD2
 	mov ds, ax
 	mov dl, S2
 	call output
-assume DS:SD3
+;assume DS:SD3 что нужно сделать, чтобы программа сработала
 	mov ax, SD3
-	mov ds, ax
-	mov dl, S3
+	mov es, ax
+	mov dl, es:S3
+	
 	call output
 	
-	mov ax, 4c00h
-	int 21h
+	;mov ax, 4c00h
+	;int 21h
 CSEG ENDS
 END main
