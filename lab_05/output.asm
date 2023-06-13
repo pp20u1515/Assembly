@@ -24,16 +24,12 @@ print_sign endp
 
 ; вывод беззнакого десятичного числа
 print_dec_unsign proc near
+    mov ah, 2
+    mov dl, "+"
+    int 21h
     call to_dec ;переводим двоичное число в десятичное 
     call new_line
-    call print_sign
 
-    ; вывод числа, которое находится по адрессу offset unsigneddec
-    mov ah, 9
-    mov dx, offset unsigneddec
-    int 21h
-
-    call new_line
     ret
 print_dec_unsign endp
 
@@ -66,7 +62,7 @@ print_bin_sign proc near
     mov ah, 2
     print_sh_b:
         mov bl, sbhvalue
-        and bl, 10000000B ; оставляем в bl только самый старший бит числа 
+        and bl, 10000000B 
         mov cl, 7
         call shift
 

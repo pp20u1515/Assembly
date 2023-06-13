@@ -26,22 +26,17 @@ to_dec proc near
         not sbhvalue
         not sblvalue
         add sblvalue, 1
-        cmp sblvalue, 00000000B
-        je add_bh
-        call convert_to_dec
         
+        ;not sblvalue
+        ;not sbhvalue
+        ;add sblvalue, 1
+        call convert_to_dec
         sub sblvalue, 1
         not sblvalue
         not sbhvalue
+        
         ret
 
-        add_bh:
-            add sbhvalue, 1
-            call convert_to_dec
-            sub sbhvalue, 1
-            sub sblvalue, 1
-            not sbhvalue
-            ret
 to_dec endp
 
 convert_to_dec proc near
@@ -78,7 +73,7 @@ to_hex proc near
     mov al, sbhvalue
     mov cl, 4
     shr al, cl
-    xlat ; смещение для hextable берется из al и конвертируется al->hextable[al]
+    xlat 
     mov signedhex[0], al
     mov al, sbhvalue
     and al, 00001111B

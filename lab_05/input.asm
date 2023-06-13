@@ -24,6 +24,8 @@ SEGCODE SEGMENT PARA PUBLIC 'CODE'
     ASSUME CS:SEGCODE, DS:SEGDATA
 
 read_bin_sign proc near
+    mov sblvalue, 0
+	mov sbhvalue, 0
     mov ah, 9
     mov dx, offset msg_in
     int 21h
@@ -62,7 +64,7 @@ read_bin_sign proc near
         mov bl, sbhvalue
         mov sblvalue, bl
         mov sbhvalue, 0
-    
+
     finish:
         ret
 read_bin_sign ENDP
